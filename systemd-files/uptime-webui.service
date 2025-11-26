@@ -1,0 +1,14 @@
+[Unit]
+Description=Uptime WebUI Server
+After=network.target
+
+[Service]
+Type=simple
+User=uptime-checker
+WorkingDirectory=/opt/uptime-checker
+ExecStart=/usr/bin/python3 /opt/uptime-checker/uptime-webui-server.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

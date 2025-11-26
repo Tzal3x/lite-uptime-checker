@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Uptime</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: monospace;
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+            padding: 20px;
+        }
+        h1 {
+            margin-bottom: 20px;
+            color: #ffffff;
+        }
+        .stats {
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        .uptime-pct {
+            color: #4ade80;
+            font-weight: bold;
+        }
+        #chart-container {
+            background-color: #2a2a2a;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+            border: 1px solid #444;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        td, th {
+            border: 1px solid #444;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #333;
+            color: #ffffff;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #252525;
+        }
+        tr:hover {
+            background-color: #303030;
+        }
+        .up {
+            color: #4ade80;
+        }
+        .down {
+            color: #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <h1>Uptime Status (Last 24h)</h1>
+    <div class="stats">
+        <p>Uptime: <span class="uptime-pct" id="uptime-pct">--</span> (<span id="up-count">0</span>/<span id="total-count">0</span> checks)</p>
+    </div>
+    <div id="chart-container">
+        <canvas id="chart"></canvas>
+    </div>
+    <table>
+        <tr>
+            <th>Time</th>
+            <th>Status</th>
+            <th>Response (ms)</th>
+        </tr>
+        <tbody id="table-body">
+        </tbody>
+    </table>
+    <script>
+        fetch('/api/data')
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('uptime-pct').textContent = data.uptime_pct.toFixed(2) + '%';
+                document.getElementById('up-count').textContent = data.up;
+                document.getElementById('total-count').textContent = data.total;
+                
+                const tbody = document.getElementById('table-body');
+                data.checks.forEach(check => {
+                    const row = document.createElement('tr');
+                    const date = new Date(check.timestamp * 1000).toLocaleString();
+                    const statusClass = check.status === 'UP' ? 'up' : 'down';
+                    row.innerHTML = `<td>${date}</td><td class="${statusClass}">${check.status}</td><td>${check.response_time}</td>`;
+                    tbody.appendChild(row);
+                });
+                
+                const labels = data.checks.map(c => new Date(c.timestamp * 1000).toLocaleTimeString());
+                const responseData = data.checks.map(c => c.response_time);
+                const statusColors = data.checks.map(c => c.status === 'UP' ? '#4ade80' : '#ef4444');
+                
+                new Chart(document.getElementById('chart'), {
+                    type: 'scatter',
+                    data: {
+                        datasets: [{
+                            label: 'Response Time (ms)',
+                            data: data.checks.map((c, i) => ({
+                                x: c.timestamp,
+                                y: c.response_time,
+                                status: c.status
+                            })),
+                            pointRadius: 5,
+                            pointBackgroundColor: statusColors,
+                            pointBorderColor: statusColors,
+                            showLine: true,
+                            borderColor: '#666',
+                            borderWidth: 1,
+                            fill: false,
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#e0e0e0'
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                type: 'linear',
+                                title: {
+                                    display: true,
+                                    text: 'Unix Timestamp',
+                                    color: '#e0e0e0'
+                                },
+                                grid: {
+                                    color: '#333'
+                                },
+                                ticks: {
+                                    color: '#e0e0e0'
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Response Time (ms)',
+                                    color: '#e0e0e0'
+                                },
+                                grid: {
+                                    color: '#333'
+                                },
+                                ticks: {
+                                    color: '#e0e0e0'
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+    </script>
+</body>
+</html>

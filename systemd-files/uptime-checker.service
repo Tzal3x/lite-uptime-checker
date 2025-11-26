@@ -1,0 +1,16 @@
+[Unit]
+Description=Uptime Checker Service
+After=network.target
+
+[Service]
+Type=simple
+User=uptime-checker
+WorkingDirectory=/opt/uptime-checker
+ExecStart=/opt/uptime-checker/checker.sh
+Restart=on-failure
+RestartSec=10
+Environment="UPTIME_CHECK_URL=<INSERT-YOUR-SERVICE-HERE>"
+Environment="UPTIME_CHECK_INTERVAL=120"
+
+[Install]
+WantedBy=multi-user.target
