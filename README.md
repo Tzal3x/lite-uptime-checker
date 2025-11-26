@@ -32,6 +32,7 @@ sudo chown uptime-checker:uptime-checker /var/lib/uptime-checker
 ```bash
 sudo cp src/checker.sh /opt/uptime-checker/
 sudo cp src/uptime-webui-server.py /opt/uptime-checker/
+sudo cp src/index.html /opt/uptime-checker/
 sudo chmod +x /opt/uptime-checker/*.sh
 ```
 
