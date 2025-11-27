@@ -1,6 +1,6 @@
 # lite-uptime-checker
 
-A minimal uptime monitor that detects service downtime.
+A **minimal** uptime monitor that detects service downtime.
 
 ## TL;DR
 
@@ -10,6 +10,7 @@ The implementation is as simple as it gets:
 2. The responses are saved in an SQLite3 database.
 3. A web server (`uptime-webui-server.py`) provides a simple UI to view a plot and a table of the data.
 4. Everything is registered as a systemd service.
+5. When downtime is detected, [ntfy](http://ntfy.sh) is used to send a notification to your phone or desktop. Make sure that you set this up.
 
 ## Installation
 
